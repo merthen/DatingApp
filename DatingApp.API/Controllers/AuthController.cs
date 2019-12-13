@@ -47,13 +47,11 @@ namespace DatingApp.API.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(UserForLoginDTO userForLoginDTO)
         {
-
-            var userFromRepo = await _repo.Login(userForLoginDTO.Username, userForLoginDTO.Password);
+            var userFromRepo = await _repo.Login(userForLoginDTO.Username
+                .ToLower(), userForLoginDTO.Password);
 
             if (userFromRepo == null)
-            {
                 return Unauthorized();
-            }
 
             var claims = new[]
             {
@@ -68,7 +66,7 @@ namespace DatingApp.API.Controllers
             var tokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.Now.AddDays(1),
+                Expires = DateTime.Now.AddDays(3),
                 SigningCredentials = creds
             };
 
@@ -76,7 +74,8 @@ namespace DatingApp.API.Controllers
 
             var token = tokenHandler.CreateToken(tokenDescriptor);
 
-            return Ok(new {
+            return Ok(new
+            {
                 token = tokenHandler.WriteToken(token)
             });
         }
